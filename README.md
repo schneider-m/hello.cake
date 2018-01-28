@@ -3,8 +3,8 @@
 A simple example for building .NET Core apps with Cake including targets for
 
 - Clean
-- Version (GitVersion, generates AssemblyInfo.cs)
 - Restore
+- Version (GitVersion, generates AssemblyInfo.cs)
 - Build
 - Test (NUnit, *.Tests.csproj)
 - Publish (framework-dependent or self-contained)

@@ -71,8 +71,8 @@ Task("Build")
             });
     })
 	.IsDependentOn("Clean")
-	.IsDependentOn("Version")
-    .IsDependentOn("Restore");;
+	.IsDependentOn("Restore")
+	.IsDependentOn("Version");    
 
 Task("Test")  
     .Does(() =>
