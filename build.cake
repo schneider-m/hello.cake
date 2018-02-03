@@ -80,11 +80,12 @@ private void Version()
 
 public void Build()
 {
-    DotNetCoreBuild(".",
-        new DotNetCoreBuildSettings()
+	DotNetCoreBuild(".", new DotNetCoreBuildSettings()
         {
             Configuration = configuration,
-            NoRestore = true
+            NoRestore = true,
+			MSBuildSettings = new DotNetCoreMSBuildSettings()
+				.WithProperty("GenerateAssemblyInfo", "false")
         });
 }
 
@@ -111,7 +112,9 @@ public void Publish()
         {
             Configuration = configuration,
             OutputDirectory = publishDirectory,
-            Runtime = runtime
+            Runtime = runtime,
+			MSBuildSettings = new DotNetCoreMSBuildSettings()
+				.WithProperty("GenerateAssemblyInfo", "false")
         });
 }
 
