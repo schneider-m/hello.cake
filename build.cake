@@ -33,10 +33,17 @@ Task("Publish")
 	.IsDependentOn("Test")
     .Does(() => Publish());
 
+
+var solutionFile = GetFiles("./*.sln").First();
+var solution = new Lazy<SolutionParserResult>(() => ParseSolution(solutionFile));
+var solutionProjects = new Lazy<IReadOnlyCollection<SolutionProject>>(() => solution.Value.Projects);
+var projectPaths = new Lazy<IEnumerable<FilePath>>(() => solutionProjects.Value
+	.Select(x => x.Path)
+	.Where(x => x.HasExtension));
+
 private void Clean()
 {
-    var projects = GetFiles("./**/*.csproj");
-    foreach (var project in projects)
+    foreach (var project in projectPaths.Value)
     {
         Information("Cleaning project " + project);
         DotNetCoreClean(project.ToString(), new DotNetCoreCleanSettings
@@ -70,8 +77,7 @@ private void Version()
             InformationalVersion = gitVersion.InformationalVersion
         });
 
-    var projects = GetFiles("./**/*.csproj");
-    foreach (var project in projects)
+    foreach (var project in projectPaths.Value)
     {
         var assemblyInfo = System.IO.Path.Combine(project.GetDirectory().FullPath, "AssemblyInfo.cs");
         CopyFile(solutionInfo, assemblyInfo);
@@ -91,8 +97,8 @@ public void Build()
 
 public void Test()
 {
-    var projects = GetFiles("./**/*Tests.csproj");
-    foreach (var project in projects)
+	var testProjects = projectPaths.Value.Where(x => x.FullPath.EndsWith("Tests.csproj"));
+    foreach (var project in testProjects)
     {
         Information("Testing project " + project);
         DotNetCoreTest(project.ToString(),
