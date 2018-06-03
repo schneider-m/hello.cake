@@ -1,4 +1,5 @@
 #tool "nuget:?package=GitVersion.CommandLine"
+#tool "nuget:?package=coverlet.msbuild"
 
 var target = Argument("Target", "Build");
 var configuration = Argument("Configuration", "Release");
@@ -106,7 +107,8 @@ public void Test()
             {
                 Configuration = configuration,
                 NoRestore = true,
-                NoBuild = true
+                NoBuild = true,
+				ArgumentCustomization = args=>args.Append("/p:CollectCoverage=true /p:Exclude=[NUnit*]*")
             });
     }
 }

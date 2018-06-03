@@ -5,9 +5,10 @@ namespace ClassLibrary.Tests
     public class Tests
     {
         [Test]
-        public void Test()
+        public void HelloWorldTest()
         {
-            Assert.IsTrue(true);
+            var sut = new Class1();
+            Assert.AreEqual(sut.HelloWorld(), "Hello World!");
         }
     }
 }
