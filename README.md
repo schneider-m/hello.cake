@@ -27,12 +27,6 @@ Publish a self-contained app targeting win10-x64:
 
 ## FAQ
 
-**Build error CS0579: Duplicate 'System.Reflection.AssemblyCompanyAttribute'**
-
-Disable automatic generation of assembly information for every project via
-
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-
 **Test execution fails with: No test is available in ...**
 
 All test projects must target `netcoreapp` not `netstandard`.
