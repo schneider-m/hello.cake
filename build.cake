@@ -1,5 +1,5 @@
-#tool "nuget:?package=GitVersion.CommandLine"
-#tool "nuget:?package=coverlet.msbuild"
+#tool GitVersion.CommandLine&version=5.0.1
+#tool "nuget:?package=coverlet.msbuild&version=2.6.3"
 
 var target = Argument("Target", "Build");
 var configuration = Argument("Configuration", "Release");
