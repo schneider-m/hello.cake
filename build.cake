@@ -17,14 +17,10 @@ Task("Clean")
 Task("Restore")
     .Does(() => Restore());
 
-Task("Version")
-    .Does(() => Version());
-
 Task("Build")
 	.IsDependentOn("Clean")
 	.IsDependentOn("Restore")
-	.IsDependentOn("Version")
-    .Does(() => Build());
+	.Does(() => Build());
 
 Task("Test")
 	.IsDependentOn("Build")
@@ -33,7 +29,6 @@ Task("Test")
 Task("Publish")
 	.IsDependentOn("Test")
     .Does(() => Publish());
-
 
 var solutionFile = GetFiles("./*.sln").First();
 var solution = new Lazy<SolutionParserResult>(() => ParseSolution(solutionFile));
@@ -59,44 +54,20 @@ private void Restore()
 {
     DotNetCoreRestore();
 }
-
-private void Version()
+ 
+private void Build()
 {
     var gitVersion = GitVersion();
-    var solutionInfo = "./SolutionInfo.cs";
-    CreateAssemblyInfo(solutionInfo,
-        new AssemblyInfoSettings
-        {
-            Company = "MyCompany",
-            Product = "MyProduct",
-            Description = "",
-            Copyright = string.Format("Copyright (c) MyCompany"),
-            Configuration = configuration,
-            ComVisible = false,
-            Version = gitVersion.AssemblySemVer,
-            FileVersion = gitVersion.AssemblySemFileVer,
-            InformationalVersion = gitVersion.InformationalVersion
-        });
-
-    foreach (var project in projectPaths.Value)
-    {
-        var assemblyInfo = System.IO.Path.Combine(project.GetDirectory().FullPath, "AssemblyInfo.cs");
-        CopyFile(solutionInfo, assemblyInfo);
-    }
-}
-
-public void Build()
-{
-	DotNetCoreBuild(".", new DotNetCoreBuildSettings()
+    var buildSettings = new DotNetCoreBuildSettings
         {
             Configuration = configuration,
-            NoRestore = true,
-			MSBuildSettings = new DotNetCoreMSBuildSettings()
-				.WithProperty("GenerateAssemblyInfo", "false")
-        });
+            MSBuildSettings = GetBuildSettings()
+        };
+
+	DotNetCoreBuild(".", buildSettings);
 }
 
-public void Test()
+private void Test()
 {
 	var testProjects = projectPaths.Value.Where(x => x.FullPath.EndsWith("Tests.csproj"));
     foreach (var project in testProjects)
@@ -113,17 +84,27 @@ public void Test()
     }
 }
 
-public void Publish()
-{
+private void Publish()
+{    
     DotNetCorePublish(".",
         new DotNetCorePublishSettings()
         {
             Configuration = configuration,
             OutputDirectory = publishDirectory,
             Runtime = runtime,
-			MSBuildSettings = new DotNetCoreMSBuildSettings()
-				.WithProperty("GenerateAssemblyInfo", "false")
+			MSBuildSettings = GetBuildSettings()
         });
+}
+
+private DotNetCoreMSBuildSettings GetBuildSettings()
+{
+    var gitVersion = GitVersion();
+    return new DotNetCoreMSBuildSettings()
+        .SetConfiguration(configuration)
+        .WithProperty("Version", gitVersion.NuGetVersionV2)
+        .WithProperty("AssemblyVersion", gitVersion.AssemblySemVer)
+        .WithProperty("FileVersion", gitVersion.MajorMinorPatch)
+        .WithProperty("InformationalVersion", gitVersion.InformationalVersion);
 }
 
 RunTarget(target);
