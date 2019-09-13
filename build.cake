@@ -3,12 +3,18 @@
 
 var target = Argument("Target", "Build");
 var configuration = Argument("Configuration", "Release");
-var publishDirectory = Argument("PublishDirectory", "publish");
 var runtime = Argument("runtime", (string)null);
+
+var packageProject = File(Argument("PackageProject", "./ClassLibrary/ClassLibrary.csproj"));
+var publishDirectory = Directory("./publish");
+var packageDirectory = Directory("./pack");
+var gitVersion = GitVersion();
 
 Information($"Target: {target}");
 Information($"Configuration: {configuration}");
 Information($"PublishDirectory: {publishDirectory}");
+Information($"PackageDirectory: {packageDirectory}");
+Information($"PackageProject: {packageProject}");
 Information($"Runtime: {runtime}");
 
 Task("Clean")
@@ -29,6 +35,10 @@ Task("Test")
 Task("Publish")
 	.IsDependentOn("Test")
     .Does(() => Publish());
+    
+Task("Pack")
+    .IsDependentOn("Test")
+    .Does(() => Pack());
 
 var solutionFile = GetFiles("./*.sln").First();
 var solution = new Lazy<SolutionParserResult>(() => ParseSolution(solutionFile));
@@ -48,6 +58,7 @@ private void Clean()
         });
     }
     CleanDirectory(publishDirectory);
+    CleanDirectory(packageDirectory);
 }
 
 private void Restore()
@@ -56,8 +67,7 @@ private void Restore()
 }
  
 private void Build()
-{
-    var gitVersion = GitVersion();
+{    
     var buildSettings = new DotNetCoreBuildSettings
         {
             Configuration = configuration,
@@ -96,9 +106,28 @@ private void Publish()
         });
 }
 
+private void Pack()
+{
+    var packSettings = new DotNetCorePackSettings
+    {
+        Configuration = configuration,
+        MSBuildSettings = new DotNetCoreMSBuildSettings()
+            .SetMaxCpuCount(0)
+            .SetConfiguration(configuration)
+            .WithProperty("PackageOutputPath", packageDirectory)
+            .WithProperty("RepositoryCommit", gitVersion.Sha)
+            .WithProperty("Version", gitVersion.NuGetVersionV2)
+            .WithProperty("PackageVersion", gitVersion.NuGetVersionV2)
+            .WithProperty("AssemblyVersion", gitVersion.AssemblySemVer)
+            .WithProperty("FileVersion", gitVersion.MajorMinorPatch)
+            .WithProperty("InformationalVersion", gitVersion.InformationalVersion)
+    };
+
+    DotNetCorePack(packageProject, packSettings);
+}
+
 private DotNetCoreMSBuildSettings GetBuildSettings()
 {
-    var gitVersion = GitVersion();
     return new DotNetCoreMSBuildSettings()
         .SetConfiguration(configuration)
         .WithProperty("Version", gitVersion.NuGetVersionV2)

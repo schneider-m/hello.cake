@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>MyPackage</PackageId>
+    <Title>MyPackage</Title>
+    <Authors>Authors</Authors>
+    <Owners>Owners</Owners>
+    <Description>Description</Description>
+    <Summary>Summary</Summary>
+    <RepositoryUrl>https://www.nuget.org/packages</RepositoryUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageTags>PackageTags</PackageTags>
   </PropertyGroup>
 
 </Project>

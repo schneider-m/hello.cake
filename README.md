@@ -19,14 +19,11 @@ Build:
 Run tests:
 
     ./build.ps1 -target="Test"
+    
+Create a nuget package:
+
+    ./build.ps1 -target="Pack"
 
 Publish a self-contained app targeting win10-x64:
     
     ./build.ps1 -target="Publish" -runtime="win10-x64"
-
-
-## FAQ
-
-**Test execution fails with: No test is available in ...**
-
-All test projects must target `netcoreapp` not `netstandard`.
