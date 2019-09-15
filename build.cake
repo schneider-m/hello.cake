@@ -8,8 +8,9 @@ var packageSource = Argument("packageSource", (string)null);
 
 var packageProject = File(Argument("PackageProject", "./ClassLibrary/ClassLibrary.csproj"));
 var packageApiKey = EnvironmentVariable("PACKAGE_API_KEY");
-var packageDirectory = Directory("./pack");
-var publishDirectory = Directory("./publish");
+
+var packageDirectory = MakeAbsolute(Directory("./pack"));
+var publishDirectory = MakeAbsolute(Directory("./publish"));
 
 var gitVersion = GitVersion();
 
@@ -107,7 +108,7 @@ private void Publish()
         new DotNetCorePublishSettings()
         {
             Configuration = configuration,
-            OutputDirectory = publishDirectory,
+            OutputDirectory = publishDirectory.ToString(),
             Runtime = runtime,
             MSBuildSettings = GetBuildSettings()
         });
@@ -121,7 +122,7 @@ private void Pack()
         MSBuildSettings = new DotNetCoreMSBuildSettings()
             .SetMaxCpuCount(0)
             .SetConfiguration(configuration)
-            .WithProperty("PackageOutputPath", packageDirectory)
+            .WithProperty("PackageOutputPath", packageDirectory.ToString())
             .WithProperty("RepositoryCommit", gitVersion.Sha)
             .WithProperty("Version", gitVersion.NuGetVersionV2)
             .WithProperty("PackageVersion", gitVersion.NuGetVersionV2)
