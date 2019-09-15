@@ -6,11 +6,10 @@ var configuration = Argument("Configuration", "Release");
 var runtime = Argument("runtime", (string)null);
 var packageSource = Argument("packageSource", (string)null);
 var packageApiKey = Argument("packageApiKey", (string)null);
+var packageProject = Argument("PackageProject", (string)null);
 
-var packageProject = File(Argument("PackageProject", "./ClassLibrary/ClassLibrary.csproj"));
-
-var packageDirectory = MakeAbsolute(Directory("./pack"));
-var publishDirectory = MakeAbsolute(Directory("./publish"));
+var packageDirectory = MakeAbsolute(Directory("./pack")).ToString();
+var publishDirectory = MakeAbsolute(Directory("./publish")).ToString();
 
 var gitVersion = GitVersion();
 
@@ -108,7 +107,7 @@ private void Publish()
         new DotNetCorePublishSettings()
         {
             Configuration = configuration,
-            OutputDirectory = publishDirectory.ToString(),
+            OutputDirectory = publishDirectory,
             Runtime = runtime,
             MSBuildSettings = GetBuildSettings()
         });
@@ -116,13 +115,16 @@ private void Publish()
 
 private void Pack()
 {
+    if (string.IsNullOrWhiteSpace(packageProject))
+        throw new ArgumentNullException(nameof(packageProject), "No project to package specified");
+
     var packSettings = new DotNetCorePackSettings
     {
         Configuration = configuration,
         MSBuildSettings = new DotNetCoreMSBuildSettings()
             .SetMaxCpuCount(0)
             .SetConfiguration(configuration)
-            .WithProperty("PackageOutputPath", packageDirectory.ToString())
+            .WithProperty("PackageOutputPath", MakeAbsolute(File(packageDirectory)).ToString())
             .WithProperty("RepositoryCommit", gitVersion.Sha)
             .WithProperty("Version", gitVersion.NuGetVersionV2)
             .WithProperty("PackageVersion", gitVersion.NuGetVersionV2)
@@ -139,7 +141,7 @@ private void Push()
     if (string.IsNullOrWhiteSpace(packageSource))
         throw new ArgumentNullException(nameof(packageSource), "Package source is missing");
 
-    var package = GetFiles(MakeAbsolute(packageDirectory).ToString() + "/*.nupkg").FirstOrDefault();
+    var package = GetFiles(packageDirectory + "/*.nupkg").FirstOrDefault();
     if (package == null)
         throw new Exception("Package not found");
 
