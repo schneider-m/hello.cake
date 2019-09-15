@@ -136,9 +136,6 @@ private void Pack()
 
 private void Push()
 {
-    if (string.IsNullOrWhiteSpace(packageApiKey))
-        throw new ArgumentNullException(nameof(packageApiKey), "API Key is missing");
-
     if (string.IsNullOrWhiteSpace(packageSource))
         throw new ArgumentNullException(nameof(packageSource), "Package source is missing");
 
