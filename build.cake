@@ -5,9 +5,9 @@ var target = Argument("Target", "Build");
 var configuration = Argument("Configuration", "Release");
 var runtime = Argument("runtime", (string)null);
 var packageSource = Argument("packageSource", (string)null);
+var packageApiKey = Argument("packageApiKey", (string)null);
 
 var packageProject = File(Argument("PackageProject", "./ClassLibrary/ClassLibrary.csproj"));
-var packageApiKey = EnvironmentVariable("PACKAGE_API_KEY");
 
 var packageDirectory = MakeAbsolute(Directory("./pack"));
 var publishDirectory = MakeAbsolute(Directory("./publish"));
